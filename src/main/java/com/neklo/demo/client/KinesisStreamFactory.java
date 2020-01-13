@@ -4,10 +4,16 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.v2.IRecordProcess
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.v2.IRecordProcessorFactory;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+
 @Component
 public class KinesisStreamFactory implements IRecordProcessorFactory {
+
+	@Resource
+	private KinesisStreamConsumer kinesisStreamConsumer;
+
 	@Override
 	public IRecordProcessor createProcessor() {
-		return new KinesisStreamConsumer();
+		return kinesisStreamConsumer;
 	}
 }

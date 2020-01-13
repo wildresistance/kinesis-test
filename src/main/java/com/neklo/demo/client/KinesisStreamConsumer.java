@@ -4,15 +4,23 @@ import com.amazonaws.services.kinesis.clientlibrary.interfaces.v2.IRecordProcess
 import com.amazonaws.services.kinesis.clientlibrary.types.InitializationInput;
 import com.amazonaws.services.kinesis.clientlibrary.types.ProcessRecordsInput;
 import com.amazonaws.services.kinesis.clientlibrary.types.ShutdownInput;
-import com.amazonaws.services.kinesis.model.Record;
+import com.neklo.demo.dao.CoordsRepository;
+import com.neklo.demo.model.ObjectPosition;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.stereotype.Component;
-
-import java.util.stream.IntStream;
 
 @Component
 @Slf4j
 public class KinesisStreamConsumer implements IRecordProcessor {
+
+
+	private final CoordsRepository coordsRepository;
+
+	public KinesisStreamConsumer(CoordsRepository coordsRepository) {
+		this.coordsRepository = coordsRepository;
+	}
+
 	@Override
 	public void initialize(InitializationInput initializationInput) {
 
@@ -20,18 +28,11 @@ public class KinesisStreamConsumer implements IRecordProcessor {
 
 	@Override
 	public void processRecords(ProcessRecordsInput processRecordsInput) {
-		IntStream intStream = processRecordsInput.getRecords().stream()
-				.map(Record::getData)
-				.map(el-> new String(el.array()))
-				.mapToInt(Integer::valueOf);
-		Double avg = intStream.average().orElse(0.0);
-		IntStream intStream1 = processRecordsInput.getRecords().stream()
-				.map(Record::getData)
-				.map(el-> new String(el.array()))
-				.mapToInt(Integer::valueOf);
-		Long count = intStream1.count();
-		log.info("Average is {}, count of records is {}", avg, count);
-
+		processRecordsInput
+				.getRecords().forEach(record -> {
+			ObjectPosition position = SerializationUtils.deserialize(record.getData().array());
+			coordsRepository.addCords(position);
+		});
 	}
 
 	@Override

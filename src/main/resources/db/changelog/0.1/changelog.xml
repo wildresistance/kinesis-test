@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+
+    <preConditions>
+        <dbms type="postgresql"/>
+    </preConditions>
+
+    <changeSet id="0" author="anton.kurilyonok">
+        <sql>
+            create schema if not exists test_coords authorization postgres;
+        </sql>
+    </changeSet>
+
+    <changeSet id="1" author="anton.kurilyonok">
+        <sql>
+            create extension if not exists "uuid-ossp";
+        </sql>
+    </changeSet>
+
+    <changeSet id="2" author="anton.kurilyonok">
+        <sql>
+            drop table if exists test_coords.coords_data;
+            create table test_coords.coords_data
+            (
+            uuid char(36) default uuid_generate_v4() primary key,
+            longitude numeric(12,8),
+            latitude numeric(12,8),
+            object varchar(10),
+            moment timestamp,
+            constraint uk_position_timestamp unique(longitude,latitude,moment)
+            );
+        </sql>
+    </changeSet>
+</databaseChangeLog>
+
